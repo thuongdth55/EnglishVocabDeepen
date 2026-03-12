@@ -231,7 +231,7 @@
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         book.innerHTML = `
             <div class="flashcard">
-                <div class="header-section">
+                <div class="header-section" onclick="speak_en('${item['word']}')">
                     <h1 class="big-char">${item['word'] || '？'}</h1>
                     <div class="info-top">
                         <div class="ipa-box">
@@ -240,7 +240,7 @@
                             <button class="speak-btn" onclick="speak_en('${item['word']}')">🔊</button>
                         </div>
                         <div class="meaning">
-                          Meaning: <a href="${item['meaning'] || '#'}" target="_blank" rel="noopener noreferrer">
+                          Meaning: <a href="${item['meaning'] || '#'}">
                             ${item['meaning'] || ''}
                           </a>
                         </div>
