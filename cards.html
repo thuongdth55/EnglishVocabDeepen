@@ -76,6 +76,11 @@
                 color: #3498db;
                 font-weight: bold;
         }
+        .lang-link {
+                color: #3498db;        /* Đổi màu text thành xanh dương */
+                text-decoration: none; /* Bỏ gạch chân mặc định nếu muốn */
+                font-weight: bold;     /* Làm chữ đậm cho dễ bấm */
+        }
         .section-title { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--secondary); margin-top: 5px; }
         .component-box { background: white; border-left: 6px solid #ff9f43; border-radius: 12px; padding: 15px; }
         .total-strokes { background: #e1f5fe; color: var(--primary); text-align: center; padding: 10px; border-radius: 10px; font-weight: bold; }
@@ -303,15 +308,31 @@
 
     function parseExtendedVocab(text) {
         if (!text) return [];
-        return text.split(/\\n|\r?\n/).map(line => {
-            const parts = line.replace(/^\d+\.\s*/, '').split(' - ').map(p => p.trim());
-            console.log("en:", parts[0]);
-            console.log("ipa: ", parts[1]);
-            console.log("vi: ", parts[2]);
-            return { en: parts[0] || '', ipa: parts[1] || '', vi: parts[2] || ''};
-        }).filter(v => v.en);
-    }
 
+        // 1. Tách các mục lớn bằng regex tìm số thứ tự (ví dụ: "1. ", "2. ")
+        // Dùng split với regex bắt giữ nhóm sẽ giúp giữ lại nội dung
+        const sections = text.split(/(?=\d+\.\s+)/).filter(s => s.trim());
+
+        return sections.map(section => {
+            // Loại bỏ số thứ tự ở đầu (ví dụ "1. ")
+            const cleanSection = section.replace(/^\d+\.\s*/, '').trim();
+        
+            // 2. Tách dựa trên dấu gạch ngang " - "
+            // Dùng regex để đảm bảo dấu gạch ngang có khoảng trắng xung quanh
+            const parts = cleanSection.split(/\s+-\s+/);
+
+            // Xử lý xuống dòng \n thành <br> để hiển thị đẹp trên HTML
+            const formatText = (str) => str ? str.replace(/\\n/g, '<br>').replace(/\n/g, '<br>').trim() : '';
+            console.log("en:", formatText(parts[0]));
+            console.log("ipa: ", formatText(parts[1]));
+            console.log("vi: ", formatText(parts[2]));
+            return {
+                en: formatText(parts[0]),
+                ipa: formatText(parts[1]),
+                vi: formatText(parts[2])
+            };
+        }).filter(v => v.en); // Lọc bỏ các mục lỗi
+    }
 
     function speak_en(text) {
         if (!text) return;
@@ -339,7 +360,7 @@
         }
     
         return list.map(v => `
-            <div class="ext-vocab-item" onclick="event.stopPropagation(); speak_en('${v.en}')">
+            <div class="ext-vocab-item" onclick="event.stopPropagation(); speak_en('${v.en.replace(/'/g, "\\'")}')">
                 <div class="ext-en">${v.en}</div>
                 <div class="ext-ipa">${v.ipa}</div>
                 <div class="ext-vi">${v.vi}</div>
