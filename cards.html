@@ -67,6 +67,15 @@
                 color: #e67e22; /* Màu cam đất (dễ nhìn) */
                 font-weight: 500; /* Làm chữ đậm hơn một chút để nổi bật */
         }
+        .ext-en { font-weight: bold }
+        .ext-ipa  {color: #e67e22; }
+        .spacing-left {
+                /* 20px tương đương khoảng 4-5 dấu cách bình thường */
+                margin-left: 25px; 
+                text-decoration: none;
+                color: #3498db;
+                font-weight: bold;
+        }
         .section-title { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--secondary); margin-top: 5px; }
         .component-box { background: white; border-left: 6px solid #ff9f43; border-radius: 12px; padding: 15px; }
         .total-strokes { background: #e1f5fe; color: var(--primary); text-align: center; padding: 10px; border-radius: 10px; font-weight: bold; }
@@ -232,8 +241,7 @@
                         </div>
                         <div class="meaning">
                           Meaning: <a class="lang-link" href="${item['meaning'] || '#'}">vi</a>
-                                    <span class="separator">   </span> 
-                                    <a class="lang-link" href="${item['meaning_en'] || '#'}">en</a>
+                                   <a class="lang-link spacing-left" href="${item['meaning_en'] || '#'}">en</a>
                         </div>
                     </div>
                 </div>
@@ -297,6 +305,9 @@
         if (!text) return [];
         return text.split(/\\n|\r?\n/).map(line => {
             const parts = line.replace(/^\d+\.\s*/, '').split(' - ').map(p => p.trim());
+            console.log("en:", parts[0]);
+            console.log("ipa: ", parts[1]);
+            console.log("vi: ", parts[2]);
             return { en: parts[0] || '', ipa: parts[1] || '', vi: parts[2] || ''};
         }).filter(v => v.en);
     }
