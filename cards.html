@@ -253,7 +253,7 @@
 
                 ${item['verb forms'] ? `
                     <div class="verb-forms-section" 
-                         style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 10px; font-size: 13px; color: #555; text-align: center; border-left: 4px solid #3498db; cursor: pointer;" 
+                    style="margin: 10px 0; padding: 10px 15px; background: #f8f9fa; border-radius: 10px; font-size: 13px; color: #555; text-align: left; border-left: 4px solid #3498db; cursor: pointer;"
                          onclick="event.stopPropagation(); speak_en('${item['verb forms'].replace(/'/g, "\\'")}')">
                         <strong>${item['verb forms']}</strong>
                     </div>
@@ -270,7 +270,7 @@
                 <div class="section-title">⚡Sentence Examples</div>
                 <div style="background:white; padding:15px; border-radius:15px;">${examplesHtml}</div>
 
-                <div class="section-title">📄 Memo (Đoạn văn ngắn)</div>
+                <div class="section-title">📖 Memo (Đoạn văn ngắn)</div>
                 <div style="background:white; padding:15px; border-radius:15px;">${paragraphHtml}</div>
 
                 <div class="section-title">🎧 Dialogue (Hội thoại)</div>
