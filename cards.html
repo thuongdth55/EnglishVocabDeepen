@@ -71,9 +71,23 @@
         .section-title { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--secondary); margin-top: 5px; }
         .component-box { background: white; border-left: 6px solid #ff9f43; border-radius: 12px; padding: 15px; }
         .total-strokes { background: #e1f5fe; color: var(--primary); text-align: center; padding: 10px; border-radius: 10px; font-weight: bold; }
-        .mnemonic-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
+        .mnemonic-grid {
+                display: block; /* Chuyển về dạng khối thông thường */
+                width: 100%;
+                margin-bottom: 15px; /* Khoảng cách với phần nội dung bên dưới */
+        }
         .mnemonic-text { background: #fff9db; padding: 15px; border-radius: 15px; font-size: 13px; line-height: 1.5; }
-        .mnemonic-img { width: 100%; height: 120px; object-fit: cover; border-radius: 15px; background: #eee; }
+        .mnemonic-img {
+            width: 100%; 
+            /* Thay đổi chiều cao từ 120px thành auto hoặc một con số lớn hơn để ảnh hiển thị rõ nét hơn khi đứng một mình */
+            height: auto; 
+            max-height: 400px; /* Giới hạn chiều cao tối đa để không choán hết màn hình */
+    
+            object-fit: contain; /* Dùng contain để thấy toàn bộ ảnh mà không bị mất góc */
+            border-radius: 15px;
+            background: #eee;
+            display: block;
+        }
         .stroke-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: white; padding: 10px; border-radius: 15px; }
         .stroke-item { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
         
@@ -225,7 +239,11 @@
                             <span class="ipa-text">${item['ipa'] || ''}</span>
                             <button class="speak-btn" onclick="speak_en('${item['word']}')">🔊</button>
                         </div>
-                        <div class="meaning">Meaning: ${item['meaning'] || ''}</div>
+                        <div class="meaning">
+                          Meaning: <a href="${item['meaning'] || '#'}" target="_blank" rel="noopener noreferrer">
+                            ${item['meaning'] || ''}
+                          </a>
+                        </div>
                     </div>
                 </div>
 
