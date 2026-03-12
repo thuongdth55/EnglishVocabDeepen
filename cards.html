@@ -231,16 +231,13 @@
                             <span class="ipa-text">${item['ipa'] || ''}</span>
                         </div>
                         <div class="meaning">
-                          Meaning: <a href="${item['meaning'] || '#'}">
-                            vi  
-                            <a href="${item['meaning_en'] || '#'}">
-                            en
-                          </a>
+                          Meaning: <a class="lang-link" href="${item['meaning'] || '#'}">vi</a>
+                                    <span class="separator">   </span> 
+                                    <a class="lang-link" href="${item['meaning_en'] || '#'}">en</a>
                         </div>
                     </div>
                 </div>
 
-     
                 <div class="mnemonic-grid">
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
@@ -331,11 +328,8 @@
         }
     
         return list.map(v => `
-            <div class="ext-vocab-item">
-                <div class="ext-en">
-                    ${v.en} 
-                    <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button>
-                </div>
+            <div class="ext-vocab-item" onclick="event.stopPropagation(); speak_en('${v.en}')">
+                <div class="ext-en">${v.en}</div>
                 <div class="ext-ipa">${v.ipa}</div>
                 <div class="ext-vi">${v.vi}</div>
             </div>
