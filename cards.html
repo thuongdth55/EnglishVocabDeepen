@@ -255,16 +255,17 @@
                     <div class="verb-forms-section" 
                          style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 10px; font-size: 13px; color: #555; text-align: center; border-left: 4px solid #3498db; cursor: pointer;" 
                          onclick="event.stopPropagation(); speak_en('${item['verb forms'].replace(/'/g, "\\'")}')">
-                        <strong>Verb Forms:</strong> ${item['verb forms']}
+                        <strong>${item['verb forms']}</strong>
                     </div>
                 ` : ''}
+
+                <a class="lang-link" href="${item['video_link'] || '#'}" style="color: #3498db; font-weight: bold; text-decoration: none;">
+                    Watch Video
+                </a>
                 
                 <div class="mnemonic-grid">
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
-                <a class="lang-link" href="${item['video_link'] || '#'}" style="color: #3498db; font-weight: bold; text-decoration: none;">
-                    Watch Video
-                </a>
 
                 <div class="section-title">📚 Từ vựng mở rộng</div>
                 <div style="background:white; padding:15px; border-radius:15px;">${examplesHtml}</div>
