@@ -251,6 +251,14 @@
                     </div>
                 </div>
 
+                ${item['verb forms'] ? `
+                    <div class="verb-forms-section" 
+                         style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 10px; font-size: 13px; color: #555; text-align: center; border-left: 4px solid #3498db; cursor: pointer;" 
+                         onclick="event.stopPropagation(); speak_en('${item['verb forms'].replace(/'/g, "\\'")}')">
+                        <strong>Verb Forms:</strong> ${item['verb forms']}
+                    </div>
+                ` : ''}
+                
                 <div class="mnemonic-grid">
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
