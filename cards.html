@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="preconnect" href="https://raw.githubusercontent.com">
+    <link rel="dns-prefetch" href="https://raw.githubusercontent.com">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vocab Deepen</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary: #00a86b;
+            --secondary: #1a5fb4;
+            --bg: #f2f2f7;
+            --text: #2c3e50;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden; /* Chặn cuộn toàn trang để tránh lỗi nhảy lung tung */
+            height: 100vh;
+        }
+
+        #book {
+            height: 100vh;
+            width: 100%;
+            overflow-y: auto; /* Chỉ cho phép cuộn bên trong nội dung thẻ nếu thẻ quá dài */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .flashcard {
+            min-height: 100vh;
+            width: 100%;
+            padding: 20px;
+            padding-bottom: 120px; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: fadeIn 0.3s ease; /* Hiệu ứng chuyển trang nhẹ nhàng */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section { background: white; border: 2px solid var(--primary); 
+                         border-radius: 20px; padding: 20px; 
+                         display: flex; 
+                         justify-content: space-between; 
+                         align-items: center; 
+                         box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+                         gap: 20px; /* Tạo khoảng cách an toàn ở giữa */
+                        }
+        .big-char { font-size: 80px; font-weight: bold; margin: 0; line-height: 1; }
+        .info-top { /* Đây là "phép thuật" để đẩy cả khối sang phải mà vẫn giữ căn trái bên trong */
+                margin-left: auto; 
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start; /* Căn lề trái cho tất cả dòng bên trong */
+                text-align: left;        /* Chữ dóng hàng bên trái */}
+        .pinyin-box { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .pinyin-tag { background: #34495e; color: white; padding: 2px 10px; border-radius: 10px; font-size: 11px; }
+        .pinyin-text { font-size: 24px; color: var(--primary); font-weight: bold; }
+        .han-viet { font-size: 20px; color: var(--secondary); font-weight: bold; margin: 5px 0; }
+        .meaning-small { font-size: 13px; color: #666; margin: 2px 0; }
+        .section-title { display: flex; align-items: center; gap: 8px; font-weight: bold; color: var(--secondary); margin-top: 5px; }
+        .component-box { background: white; border-left: 6px solid #ff9f43; border-radius: 12px; padding: 15px; }
+        .total-strokes { background: #e1f5fe; color: var(--primary); text-align: center; padding: 10px; border-radius: 10px; font-weight: bold; }
+        .mnemonic-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
+        .mnemonic-text { background: #fff9db; padding: 15px; border-radius: 15px; font-size: 13px; line-height: 1.5; }
+        .mnemonic-img { width: 100%; height: 120px; object-fit: cover; border-radius: 15px; background: #eee; }
+        .stroke-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: white; padding: 10px; border-radius: 15px; }
+        .stroke-item { width: 100%; aspect-ratio: 1/1; object-fit: contain; }
+        
+        /* Nav Control tối ưu cho Android */
+        .nav-control {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 25px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 9999;
+        }
+
+        .nav-btn { 
+            background: none; border: none; font-size: 24px; cursor: pointer; color: #333; 
+            touch-action: manipulation; padding: 5px 15px;
+        }
+        
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; }
+        .dot.active { background: var(--primary); width: 20px; border-radius: 10px; }
+
+        .ext-vocab-item { background: #f9fafb; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+        .ext-vocab-item:hover {
+                background-color: #f0f7ff; /* Màu xanh dương cực nhạt */
+                border-left: 3px solid #1E90FF; /* Thanh nhấn màu xanh dương bên trái */
+                border-radius: 8px;
+        }
+        .ext-han { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
+        .ext-pinyin { font-size: 14px; color: var(--primary); }
+        .speak-btn { background: none; border: 1px solid #eee; border-radius: 50%; cursor: pointer; }
+        #loading { position: fixed; inset: 0; background: white; display: flex; justify-content: center; align-items: center; z-index: 10000; }
+    </style>
+</head>
+<body>
+
+<div id="loading">Đang tải dữ liệu...</div>
+<div id="book">
+    </div>
+
+<div class="nav-control">
+    <button class="nav-btn" onpointerdown="prevPage()">←</button>
+    <div id="pageDots" class="dots"></div>
+    <button class="nav-btn" onpointerdown="nextPage()">→</button>
+</div>
+
+<script>
+    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQuXexuf23Ymy6opIpRTkl3FkD-QZWouQBcjAkHmZbEJW57FmiYSr6Waxj9BBcFHUxRAswFFLF2sslk/pub?output=csv';
+
+    let allData = []; // Biến chính lưu trữ dữ liệu
+    let currentIndex = 0;
+    let totalItems = 0;
+
+    function init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedStatus = urlParams.get('status') || 'Ready';
+        Papa.parse(sheetUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Lọc dữ liệu
+                // allData = results.data.filter(item => item['Status']?.trim() === selectedStatus);
+                allData = results.data.filter(item => {
+                        // Ép kiểu stage về số và trim Status để so sánh an toàn
+                        const stage = Number(item['stage']);
+                        const status = item['Status']?.trim();
+                        // Dùng && (Logical AND) thay vì & (Bitwise)
+                        return status === selectedStatus && stage > 0;
+                });
+                
+                if (selectedStatus === 'Ready' && allData.length > 0) {
+                    // ĐẢO NGẪU NHIÊN
+                    // shuffleArray(allData);
+                    allData.sort((a, b) => {
+                        const stageA = Number(a['stage']);
+                        const stageB = Number(b['stage']);
+
+                        if (stageA !== stageB) {
+                            // Sắp xếp theo stage tăng dần (1, 2, 3, 4, 5)
+                            return stageA - stageB;
+                        } else {
+                            // Nếu cùng stage, trả về số ngẫu nhiên từ -0.5 đến 0.5
+                            return Math.random() - 0.5;
+                        }
+                    });
+                    
+                }
+                
+                // GIẢI PHÓNG BỘ NHỚ: Xóa kết quả gốc của PapaParse
+                results = null; 
+
+                const loading = document.getElementById('loading');
+                loading.style.display = 'none';
+
+                if (allData.length === 0) {
+                    document.getElementById('book').innerHTML = '<div class="empty-state">Không có dữ liệu sẵn sàng.</div>';
+                    return;
+                }
+                
+                totalItems = allData.length;
+                renderCard(currentIndex);
+                createDots();
+            }
+        });
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+  
+    // Hàm render ĐÚNG 1 CARD duy nhất
+    function renderCard(index) {
+        const book = document.getElementById('book');
+        const item = allData[index];
+        
+        // Reset vị trí cuộn lên đầu card mới
+        book.scrollTop = 0;
+
+        const vocabList = parseExtendedVocab(item['example']);
+        const vocabHtml = vocabList.length
+            ? vocabList.map(v => `
+                <div class="ext-vocab-item">
+                    <div class="ext-en">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
+                    <div class="ext-ipa">${ipa}</div>
+                    <div class="ext-vi">${v.vi}</div>
+                </div>
+            `).join('')
+            : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
+
+        // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
+        book.innerHTML = `
+            <div class="flashcard">
+                <div class="header-section">
+                    <h1 class="big-char">${item['word'] || '？'}</h1>
+                    <div class="info-top">
+                        <div class="ipa-box">
+                            <span class="ipa-tag">IPA</span>
+                            <span class="ipa-text">${item['ipa'] || ''}</span>
+                            <button class="speak-btn" onclick="speak_en('${item['word']}')">🔊</button>
+                        </div>
+                        <div class="meaning">Meaning: ${item['meaning'] || ''}</div>
+                    </div>
+                </div>
+
+     
+                <div class="mnemonic-grid">
+                    <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
+                </div>
+                
+                <div class="section-title">📚 Từ vựng mở rộng</div>
+                <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
+            </div>
+        `;
+        
+        updateDots();
+    }
+    
+    function nextPage() {
+        if (currentIndex < totalItems - 1) {
+            currentIndex++;
+            renderCard(currentIndex);
+        }
+    }
+
+    function prevPage() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderCard(currentIndex);
+        }
+    }
+
+    function createDots() {
+        const dotsContainer = document.getElementById('pageDots');
+        dotsContainer.innerHTML = '';
+        const limit = Math.min(totalItems, 5); 
+        for (let i = 0; i < limit; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.onpointerdown = () => { currentIndex = i; renderCard(i); };
+            dotsContainer.appendChild(dot);
+        }
+        updateDots();
+    }
+
+    function updateDots() {
+        const dots = document.querySelectorAll('.dot');
+        const activeIdx = currentIndex % 5; // Giả lập vòng lặp 5 dots
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === activeIdx);
+        });
+    }
+
+    function nl2br(text) { return text ? text.replace(/\\n/g, '<br>') : ''; }
+
+    function parseExtendedVocab(text) {
+        if (!text) return [];
+        return text.split(/\\n|\r?\n/).map(line => {
+            const parts = line.replace(/^\d+\.\s*/, '').split(' - ').map(p => p.trim());
+            return { en: parts[0] || '', ipa: parts[1] || '', vi: parts[2] || ''};
+        }).filter(v => v.en);
+    }
+
+
+    function speak_en(text) {
+        if (!text) return;
+    
+        // Dừng các yêu cầu nói cũ
+        window.speechSynthesis.cancel();
+
+        // Làm sạch chuỗi: Thay / thành dấu phẩy để nghỉ nhịp, 
+        // và đảm bảo các ký tự đặc biệt không gây lỗi
+        const cleanText = text.replace(/\//g, ',');
+
+        const utter = new SpeechSynthesisUtterance(cleanText);
+        utter.lang = 'en-US';
+    
+        // Tùy chỉnh màu xanh dương cho tâm trạng vui vẻ
+        utter.rate = 0.9; // Đọc chậm lại một chút cho rõ
+    
+        window.speechSynthesis.speak(utter);
+    }
+
+    function speak_all(vi, en) {
+        window.speechSynthesis.cancel();
+
+        // Hàm phụ để tạo lượt đọc
+        const createUtterance = (text, lang) => {
+            const utter = new SpeechSynthesisUtterance(text.replace(/\//g, ','));
+            utter.lang = lang;
+            return utter;
+        };
+
+        // Hàm thực hiện việc đọc lặp lại
+        const speakLoop = (text, lang, times, callback) => {
+            let count = 0;
+
+            const run = () => {
+                if (count < times) {
+                    const utter = createUtterance(text, lang);
+                    utter.onend = () => {
+                        count++;
+                        if (count < times) {
+                            // Nghỉ 300ms giữa các lần lặp cùng ngôn ngữ
+                            setTimeout(run, 300);
+                        } else if (callback) {
+                            // Nghỉ 1000ms (1 giây) khi chuyển sang ngôn ngữ khác
+                            setTimeout(callback, 1000);
+                        }
+                    };
+                    window.speechSynthesis.speak(utter);
+                }
+            };
+            run();
+        };
+
+        // Bắt đầu chuỗi trình tự:
+        // 1. Tiếng Trung (3 lần) -> sau đó:
+        // 2. Tiếng Việt (1 lần) -> sau đó:
+        // 3. Tiếng Anh (2 lần)
+        speakLoop(en, 'en-US', 2, () => {
+            speakLoop(vi, 'vi-VN', 1);
+        });
+    }
+    
+    init();
+</script>
+</body>
+</html>
+
+
+
+
