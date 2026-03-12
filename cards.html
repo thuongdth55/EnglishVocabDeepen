@@ -217,16 +217,16 @@
         // Reset vị trí cuộn lên đầu card mới
         book.scrollTop = 0;
 
-        // const vocabList = parseExtendedVocab(item['example']);
-        // const vocabHtml = vocabList.length
-        //     ? vocabList.map(v => `
-        //         <div class="ext-vocab-item">
-        //             <div class="ext-en">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
-        //             <div class="ext-ipa">${ipa}</div>
-        //             <div class="ext-vi">${v.vi}</div>
-        //         </div>
-        //     `).join('')
-        //     : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
+        const vocabList = parseExtendedVocab(item['example']);
+        const vocabHtml = vocabList.length
+            ? vocabList.map(v => `
+                <div class="ext-vocab-item">
+                    <div class="ext-en">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
+                    <div class="ext-ipa">${v.ipa}</div>
+                    <div class="ext-vi">${v.vi}</div>
+                </div>
+            `).join('')
+            : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
 
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         book.innerHTML = `
@@ -237,11 +237,12 @@
                         <div class="ipa-box">
                             <span class="ipa-tag">IPA</span>
                             <span class="ipa-text">${item['ipa'] || ''}</span>
-                            <button class="speak-btn" onclick="speak_en('${item['word']}')">🔊</button>
                         </div>
                         <div class="meaning">
                           Meaning: <a href="${item['meaning'] || '#'}">
-                            ${item['meaning'] || ''}
+                            vi}
+                            <a href="${item['meaning_en'] || '#'}">
+                            en}
                           </a>
                         </div>
                     </div>
@@ -251,11 +252,12 @@
                 <div class="mnemonic-grid">
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
+
+                <div class="section-title">📚 Từ vựng mở rộng</div>
+                <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
                 
             </div>
         `;
-        //                 <div class="section-title">📚 Từ vựng mở rộng</div>
-                // <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
         updateDots();
     }
     
