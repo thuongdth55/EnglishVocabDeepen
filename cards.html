@@ -71,7 +71,7 @@
         .ext-ipa  {color: #e67e22; }
         .spacing-left {
                 /* 20px tương đương khoảng 4-5 dấu cách bình thường */
-                margin-left: 25px; 
+                margin-left: 18px; 
                 text-decoration: none;
                 color: #3498db;
                 font-weight: bold;
@@ -254,6 +254,7 @@
                 <div class="mnemonic-grid">
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
+                <a class="lang-link" href="${item['video_link'] || '#'}">${item['video_link']</a>
 
                 <div class="section-title">📚 Từ vựng mở rộng</div>
                 <div style="background:white; padding:15px; border-radius:15px;">${examplesHtml}</div>
@@ -309,29 +310,33 @@
     function parseExtendedVocab(text) {
         if (!text) return [];
 
-        // 1. Tách các mục lớn bằng regex tìm số thứ tự (ví dụ: "1. ", "2. ")
-        // Dùng split với regex bắt giữ nhóm sẽ giúp giữ lại nội dung
+        // Tách các mục lớn bằng số thứ tự (1., 2., ...)
         const sections = text.split(/(?=\d+\.\s+)/).filter(s => s.trim());
 
         return sections.map(section => {
-            // Loại bỏ số thứ tự ở đầu (ví dụ "1. ")
             const cleanSection = section.replace(/^\d+\.\s*/, '').trim();
-        
-            // 2. Tách dựa trên dấu gạch ngang " - "
-            // Dùng regex để đảm bảo dấu gạch ngang có khoảng trắng xung quanh
             const parts = cleanSection.split(/\s+-\s+/);
 
-            // Xử lý xuống dòng \n thành <br> để hiển thị đẹp trên HTML
-            const formatText = (str) => str ? str.replace(/\\n/g, '<br>').replace(/\n/g, '<br>').trim() : '';
-            console.log("en:", formatText(parts[0]));
-            console.log("ipa: ", formatText(parts[1]));
-            console.log("vi: ", formatText(parts[2]));
-            return {
-                en: formatText(parts[0]),
-                ipa: formatText(parts[1]),
-                vi: formatText(parts[2])
+            // Hàm xử lý: Xóa "A:", "B:", "Tên:" và chuyển \n thành <br>
+            const formatConversation = (str) => {
+                if (!str) return '';
+                return str
+                    .replace(/\\n/g, '\n') // Chuẩn hóa \n
+                    .split('\n')
+                    .map(line => {
+                        // Regex xóa các từ đứng trước dấu hai chấm ở đầu dòng (ví dụ A:, Person:, ...)
+                        return line.replace(/^[A-Z][a-z]*:\s*/, '').trim();
+                    })
+                    .filter(line => line) // Bỏ dòng trống
+                    .join('<br>'); // Nối lại bằng thẻ xuống dòng
             };
-        }).filter(v => v.en); // Lọc bỏ các mục lỗi
+
+            return {
+                en: formatConversation(parts[0]),
+                ipa: formatConversation(parts[1]),
+                vi: formatConversation(parts[2])
+            };
+        }).filter(v => v.en);
     }
 
     function speak_en(text) {
