@@ -203,16 +203,16 @@
         // Reset vị trí cuộn lên đầu card mới
         book.scrollTop = 0;
 
-        const vocabList = parseExtendedVocab(item['example']);
-        const vocabHtml = vocabList.length
-            ? vocabList.map(v => `
-                <div class="ext-vocab-item">
-                    <div class="ext-en">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
-                    <div class="ext-ipa">${ipa}</div>
-                    <div class="ext-vi">${v.vi}</div>
-                </div>
-            `).join('')
-            : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
+        // const vocabList = parseExtendedVocab(item['example']);
+        // const vocabHtml = vocabList.length
+        //     ? vocabList.map(v => `
+        //         <div class="ext-vocab-item">
+        //             <div class="ext-en">${v.han} <button class="speak-btn" onclick="event.stopPropagation(); speak_en('${v.en}')">🔊</button></div>
+        //             <div class="ext-ipa">${ipa}</div>
+        //             <div class="ext-vi">${v.vi}</div>
+        //         </div>
+        //     `).join('')
+        //     : '<div style="font-size:12px;color:#999">Chưa có dữ liệu.</div>';
 
         // Ghi đè toàn bộ nội dung cũ (Xóa card cũ khỏi DOM)
         book.innerHTML = `
@@ -234,11 +234,10 @@
                     <img class="mnemonic-img" src="${item['image'] || ''}" onerror="this.src='https://i.postimg.cc/d3VVgr6y/image.png'">
                 </div>
                 
-                <div class="section-title">📚 Từ vựng mở rộng</div>
-                <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
             </div>
         `;
-        
+        //                 <div class="section-title">📚 Từ vựng mở rộng</div>
+                // <div style="background:white; padding:15px; border-radius:15px;">${vocabHtml}</div>
         updateDots();
     }
     
@@ -307,48 +306,6 @@
         window.speechSynthesis.speak(utter);
     }
 
-    function speak_all(vi, en) {
-        window.speechSynthesis.cancel();
-
-        // Hàm phụ để tạo lượt đọc
-        const createUtterance = (text, lang) => {
-            const utter = new SpeechSynthesisUtterance(text.replace(/\//g, ','));
-            utter.lang = lang;
-            return utter;
-        };
-
-        // Hàm thực hiện việc đọc lặp lại
-        const speakLoop = (text, lang, times, callback) => {
-            let count = 0;
-
-            const run = () => {
-                if (count < times) {
-                    const utter = createUtterance(text, lang);
-                    utter.onend = () => {
-                        count++;
-                        if (count < times) {
-                            // Nghỉ 300ms giữa các lần lặp cùng ngôn ngữ
-                            setTimeout(run, 300);
-                        } else if (callback) {
-                            // Nghỉ 1000ms (1 giây) khi chuyển sang ngôn ngữ khác
-                            setTimeout(callback, 1000);
-                        }
-                    };
-                    window.speechSynthesis.speak(utter);
-                }
-            };
-            run();
-        };
-
-        // Bắt đầu chuỗi trình tự:
-        // 1. Tiếng Trung (3 lần) -> sau đó:
-        // 2. Tiếng Việt (1 lần) -> sau đó:
-        // 3. Tiếng Anh (2 lần)
-        speakLoop(en, 'en-US', 2, () => {
-            speakLoop(vi, 'vi-VN', 1);
-        });
-    }
-    
     init();
 </script>
 </body>
