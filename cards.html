@@ -175,8 +175,9 @@
                         // Ép kiểu stage về số và trim Status để so sánh an toàn
                         const stage = Number(item['stage']);
                         const status = item['Status']?.trim();
+                        const w = item['word']?.toString().trim();
                         // Dùng && (Logical AND) thay vì & (Bitwise)
-                        return status === selectedStatus && stage > 0;
+                        return status === selectedStatus && stage > 0 && !!w;
                 });
                 
                 if (selectedStatus === 'Ready' && allData.length > 0) {
